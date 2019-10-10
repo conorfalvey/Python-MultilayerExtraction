@@ -32,11 +32,10 @@ def multilayer_extraction(adjacency, seed, min_score, prop_sample, directed):
     k = len(initial_set[1])
 
 
-
-    # detectCores detects the number of cores available on your instance
+    core_count = mp.cpu_count()
+    results_temp = None
 
     '''
-    registerDoParallel(detectCores())
     Results.temp < - foreach(i=1: K, .packages = "MultilayerExtraction") % dopar % {
         starter < - list()
     starter$vertex.set < - as.numeric(initial.set$vertex.set[[i]])
@@ -49,6 +48,39 @@ def multilayer_extraction(adjacency, seed, min_score, prop_sample, directed):
     }
     '''
 
+    print("Cleaning Stage")
+    if (len(results_temp) < 1):
+        return("No Community Found")
+
+    scores = np.repeat(0, len(results_temp))
+'''
+    for i in range(1, len(results_temp)):
+        if (len(results_temp[i][B]) == 0):
+            scores[i] = -1000
+        if (len(results_temp[i][B]) > 0):
+            scores[i] = results_temp[i]
+'''
+'''
+    scores = round(scores, 5)
+    # keep only unique communities with score greater than threshold
+    indx = np.where((not duplicated(scores)) == True)
+    indx_2 = np.where(scores > min.score)
+    results2 = results_temp[intersect(indx, indx_2)]
+    if (len(results2) == 0):
+        results = None
+        return None
+    if (len(results2) > 0):
+        betas = seq(0.01, 1, by = 0.01)
+        results3 = list()
+        number_Communities = np.repeat(0, len(betas))
+        mean_Score = np.repeat(0, len(betas))
+        for i in range(1, len(betas)):
+            temp = cleanup(results2, betas[i])
+            results3[[i]] = list(Beta=betas[i], Communities=temp[Communities])
+            mean_Score[i] = temp[Mean.Score]
+            number_Communities[i] = len(temp[Communities])
+}
+'''
 
 '''
   #detectCores detects the number of cores available on your instance
@@ -63,20 +95,6 @@ def multilayer_extraction(adjacency, seed, min_score, prop_sample, directed):
     }
     starter$layer.set <- as.numeric(initial.set$layer.set[[i]])
     single.swap(starter, adjacency, mod.matrix, m, n)
-  }
-
-  #Cleanup the results: Keep the unique communities
-  print(paste("Cleaning Stage"))
-
-  if(length(Results.temp) < 1){return("No Community Found")}
-
-  Scores = rep(0, length(Results.temp))
-
-  for(i in 1:length(Results.temp)){
-    if(length(Results.temp[[i]]$B) == 0){Scores[i] = -1000}
-    if(length(Results.temp[[i]]$B) > 0){
-      Scores[i] = Results.temp[[i]]$Score
-    }
   }
 
   Scores = round(Scores, 5)
