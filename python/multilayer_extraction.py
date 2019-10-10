@@ -21,8 +21,6 @@ def multilayer_extraction(adjacency, seed, min_score, prop_sample, directed):
         if (i == 1):
             graph = nx.parse_edgelist(pd.DataFrame(adjacency)[i].values.tolist()[, 1:2])
             initial_set = initialization(graph, prop_sample, m, n)
-
-            initial_set < - initialization(graph, prop_sample, m, n)
         else:
             graph = nx.parse_edgelist(pd.DataFrame(adjacency)[i].values.tolist()[, 1:2])
             initial_set = np.r_(initial_set, initialization(graph, prop_sample, m, n))
