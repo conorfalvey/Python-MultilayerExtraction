@@ -1,58 +1,49 @@
 import networkx as nx
 import numpy as np
 import pandas as pd
-import multiprocessing as mp
-from expectation_CM import expectation_CM
-from initialization import initialization
 
 
-def multilayer_extraction(adjacency, seed, min_score, prop_sample, directed):
-    # Adjacency should be an edgelist with three columns (node1, node2, layer)
-    m = max(adjacency[:, 3])
-    n = len(np.unique(np.r_(adjacency[:, 1], adjacency[:, 2])))
-    directed = False
-    print("Estimation Stage")
-
-    mod_matrix = expectation_CM(adjacency)
-
-    print("Initialization Stage")
-
-    for i in range(1, m):
-        if (i == 1):
-            graph = nx.parse_edgelist(pd.DataFrame(adjacency)[i].values.tolist()[, 1:2])
-            initial_set = initialization(graph, prop_sample, m, n)
-
-            initial_set < - initialization(graph, prop_sample, m, n)
-        else:
-            graph = nx.parse_edgelist(pd.DataFrame(adjacency)[i].values.tolist()[, 1:2])
-            initial_set = np.r_(initial_set, initialization(graph, prop_sample, m, n))
-
-    print("Search Stage")
-    print("Searching over ", len(initial_set[1]), " seed sets")
-
-    results_temp = list()
-    k = len(initial_set[1])
-
-
-
-    # detectCores detects the number of cores available on your instance
-
-    '''
-    registerDoParallel(detectCores())
-    Results.temp < - foreach(i=1: K, .packages = "MultilayerExtraction") % dopar % {
-        starter < - list()
-    starter$vertex.set < - as.numeric(initial.set$vertex.set[[i]])
-    # if the initial neighborhood is of length 1, add a random vertex
-    if (length(starter$vertex.set) < 2){
-    starter$vertex.set < - c(starter$vertex.set, setdiff(1:n, starter$vertex.set)[1])
-    }
-    starter$layer.set < - as.numeric(initial.set$layer.set[[i]])
-    single.swap(starter, adjacency, mod.matrix, m, n)
-    }
-    '''
+def multilayerExtraction(adjacency, seed = 123, minScore = 0, propSample = 0.05, directed = [False, True]):
+    m = max(adjacency[:3])
 
 
 '''
+multilayer.extraction = function(adjacency, seed = 123, min.score = 0, prop.sample = 0.05, directed = c(FALSE, TRUE)){
+  #adjacency should be an edgelist with three columns - node1, node2, layer
+  #layer should be numbered with integers
+  #each network has the same number of nodes
+  #nodes are indexed by the integers starting from 1
+
+  m <- max(adjacency[, 3]) #max of the layer index
+  n <- length(unique(c(adjacency[, 1], adjacency[, 2])))
+  directed <- directed[1]
+  #Calculate the modularity matrix
+  print(paste("Estimation Stage"))
+
+  mod.matrix <- multilayer.modularity.matrix(adjacency)
+
+  #Initialize the communities
+  print(paste("Initialization Stage"))
+
+  for(i in 1:m){
+    if(i == 1){
+      graph <- graph_from_edgelist(as.matrix(subset(as.data.frame(adjacency), layer == i))[, 1:2],
+                                   directed = directed)
+      initial.set <- initialization(graph, prop.sample, m, n)
+    }else{
+      graph <- graph_from_edgelist(as.matrix(subset(as.data.frame(adjacency), layer == i))[, 1:2],
+                                   directed = directed)
+      initial.set <- Map(c, initial.set, initialization(graph, prop.sample, m, n))
+    }
+  }
+
+  #Search Across Initial sets
+  print(paste("Search Stage"))
+
+  cat(paste("Searching over", length(initial.set[[1]]), "seed sets \n"))
+  Results.temp <- list()
+  K <- length(initial.set[[1]])
+
   #detectCores detects the number of cores available on your instance
 
   registerDoParallel(detectCores())

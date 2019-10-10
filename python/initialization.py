@@ -1,12 +1,19 @@
 import networkx as nx
-import numpy as np
 import pandas as pd
 import math
+import random
 
+def initialization(adjacency, prop_sample, m, n):
+    layer_set = list()
+    for i in range(1, math.ceil(prop_sample * n)):
+        layer_set[i] = random.sample(range(1, m), math.ceil(m/2))
 
-def initialization(adjacency, propSample, m, n):
-    layerSet = np.tile(math.ceil(propSample * n), np.random.choice(range(1, m), math.ceil(m/2)))
-    neighborhoods = nx.neighbors(adjacency, 1)
-    keepSample = np.random.choice(range(1, n), math.ceil(propSample * n))
-    neighborhoods = neighborhoods[keepSample]
-    return list(neighborhoods, layerSet)
+    graph = nx.parse_edgelist(pd.DataFrame(adjacency)[i].values.tolist()[, 1:2])
+    neighborhoods = list()
+    for n in graph.nodes_iter:
+        neighborhoods.append(nx.neighbors(graph, n))
+
+    keep_sample = random.sample(range(1, n), math.ceil(prop_sample * n))
+    neighborhoods = neighborhoods[keep_sample]
+
+    return list(vertex_set = neighborhoods, layer_set = layer_set)
