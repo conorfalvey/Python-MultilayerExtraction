@@ -1,10 +1,10 @@
 # initialization
 #
 # Function that identifies statistically significant vertex-layer communities in multilayer networks
-# @param graph:
+# @param graph: Graph from edgelist used to find communities
 # @param prop_sample: The proportion of vertices to search over for initialization
-# @param m:
-# @param n:
+# @param m: number of layers
+# @param n: number of nodes per layer
 #
 # keywords: community detection, multilayer networks, configuration model, random graph models
 # @return: a list of vertex-set and layer combinations of statistically significance
