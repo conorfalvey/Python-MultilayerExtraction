@@ -1,3 +1,4 @@
+'''
 import networkx as nx
 import numpy as np
 import pandas as pd
@@ -35,7 +36,7 @@ def multilayer_extraction(adjacency, seed, min_score, prop_sample, directed):
     core_count = mp.cpu_count()
     results_temp = None
 
-    '''
+
     Results.temp < - foreach(i=1: K, .packages = "MultilayerExtraction") % dopar % {
         starter < - list()
     starter$vertex.set < - as.numeric(initial.set$vertex.set[[i]])
@@ -46,20 +47,27 @@ def multilayer_extraction(adjacency, seed, min_score, prop_sample, directed):
     starter$layer.set < - as.numeric(initial.set$layer.set[[i]])
     single.swap(starter, adjacency, mod.matrix, m, n)
     }
-    '''
+
 
     print("Cleaning Stage")
     if (len(results_temp) < 1):
         return("No Community Found")
 
     scores = np.repeat(0, len(results_temp))
-'''
+
     for i in range(1, len(results_temp)):
         if (len(results_temp[i][B]) == 0):
             scores[i] = -1000
         if (len(results_temp[i][B]) > 0):
             scores[i] = results_temp[i]
+
+    # Z = pd.DataFrame(Beta=betas, Mean.Score = mean_score, Number_Communities = Number_communities)
+    # Object = list(Community_list = result3, Diagnostics = Z)
+
+    # class(Object) = "MultilayerCommunity"
+    return None
 '''
+
 '''
     scores = round(scores, 5)
     # keep only unique communities with score greater than threshold
