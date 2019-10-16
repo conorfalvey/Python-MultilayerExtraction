@@ -6,7 +6,7 @@
 # @future_param weighted: currently not functioning. Coming in later version.
 #
 # @keywords community detection, multilayer networks, configuration model, random graph models
-# @return edgelist: a matrix with three columns representing edge connections- node1, node2, layer
+# @return edgelist: a matrix with three columns representing edge connections: node1, node2, layer
 #
 # Basis: Wilson, James D., Palowitch, John, Bhamidi, Shankar, and Nobel, Andrew B. (2017) "Significance based
 #        extraction in multilayer networks with heterogeneous community structure." Journal of Machine Learning Research
