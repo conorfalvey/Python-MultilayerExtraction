@@ -1,3 +1,4 @@
+# ***UNTESTED UNTESTED UNTESTED***
 # score
 #
 # Function that calculates the score of a multilayer vertex - layer community
@@ -17,42 +18,28 @@ import networkx as nx
 import numpy as np
 import pandas as pd
 import itertools as it
+import math
 
 
 def score(adjacency, vertex_set, layer_set, n):
-    return None
+    super_mod = None
+    if len(layer_set) < 1 or len(vertex_set) < 1:
+        return 0
+    if len(layer_set) == 1:
+        super_mod = adjacency[layer_set]
+    if len(layer_set) > 1:
+        super_mod = nx.empty_graph(n)
+        for i in range(0, layer_set):
+            super_mod = nx.union(super_mod, adjacency[i])
 
+    super_mod_subgraph = super_mod.subgraph(vertex_set)
 
-'''
-score = function(mod.matrix, vertex.set, layer.set, n){
-  
-  if(length(layer.set) < 1 || length(vertex.set) < 1){
-    return(obs.score = 0)
-  }
-  
-  if(length(layer.set) == 1){
-    super.mod <- mod.matrix[[layer.set]] #just a single igraph object
-  }
-  
-  if(length(layer.set) > 1){
-    #merge the modularity graphs
-    super.mod <- graph.empty(n = n, directed = FALSE)
-    for(j in layer.set){
-      super.mod <- igraph::union(super.mod, mod.matrix[[j]]) #take union of all networks in the layer.set
-    }
-  }
-    #take sub-graph of the modularity matrix
-    super.mod.subgraph <- induced_subgraph(super.mod, v = vertex.set)
-    
-    #get the edge weights all together
-    edge.weights <- as.data.frame(get.edge.attribute(super.mod.subgraph))
-    edge.weights[is.na(edge.weights)] <- 0
-    modularity.score <- rowSums(edge.weights) #sum across vertices first
-    modularity.score[which(modularity.score < 0)] <- 0 #only keep positive values
-    
-    tot.mod <- sum(modularity.score)
-    obs.score <- (tot.mod)^2 / (n^2*choose(length(vertex.set), 2)*(length(layer.set)))
-    
-    return(obs.score)
-  }
-'''
+    edge_weights = pd.DataFrame(nx.get_edge_attributes(super_mod_subgraph, 'weight'))
+    edge_weights = [0 for i in edge_weights if math.isnan(i)]
+    modularity_score = np.sum(edge_weights, axis=1)
+    modularity_score = [0 for i in modularity_score if i < 0]
+
+    tot_mod = np.sum(modularity_score)
+    obs_score = (tot_mod ** 2) / ((n ** 2 * it.combinations(range(0, len(vertex_set)), 2)) * (len(layer_set)))
+
+    return obs_score
