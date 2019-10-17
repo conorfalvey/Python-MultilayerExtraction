@@ -39,7 +39,7 @@ def expectation_CM(edgelist):
         degree_total = degrees.sum()
         # NumPy.dot() returns a scalar is we don't shape the vectors beforehand. By reshaping the two vectors with
         # dimensions n x m and m x n, the resultant matrix is of dimension n x n
-        expected = np.dot(degrees.reshape(3, 1), degrees.reshape(1, 3))/degree_total
+        expected = np.dot(degrees.reshape(degrees.size, 1), degrees.reshape(1, degrees.size))/degree_total
 
         # Append the resulting NetworkX graph object to the list P
         p.append(nx.from_numpy_matrix(np.asarray(expected), False))
