@@ -28,7 +28,7 @@ def initialization(graph, prop_sample, m, n):
     # and append the neighbors of each node to the node itself to model the output of iGraph's neighborhoods() function
     neighborhoods = list()
     for i in graph.nodes():
-        neighborhoods.append(list(i) + list(graph.neighbors(i)))
+        neighborhoods.append(list([i]) + list(graph.neighbors(i)))
     # Generate random sample of indices for out sample to keep
     keep_sample = random.sample(range(1, n), math.ceil(prop_sample * n))
     # Subset neighborhoods with list comprehension for all values at keep_sample's indices

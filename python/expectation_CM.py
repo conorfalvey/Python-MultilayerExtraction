@@ -21,7 +21,7 @@ def expectation_CM(edgelist):
 
     # p: an empty list to contain graph objects appended each loop
     p = list()
-    for i in range(0, m):
+    for i in range(0, m + 1):
         # Sub contains the two node columns from the edgelist for a given layer i
         sub = edgelist[edgelist['layer'] == i][['node1', 'node2']]
 
