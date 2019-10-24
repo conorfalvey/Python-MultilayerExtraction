@@ -10,8 +10,8 @@ These instructions will get you a copy of the project up and running on your loc
 
 ### Prerequisites
 
-This package uses NetworkX over iGraph for the graph manipulations.
-Aside from this, only commonly used Python packages are used.
+This module uses NetworkX over iGraph for the graph manipulations.
+Aside from this, only commonly used Python modules are used.
 
 ```
 pip3 install numpy
@@ -75,7 +75,7 @@ We use [SemVer](http://semver.org/) for versioning. For the versions available, 
 
 ## Authors
 
-* **Conor Falvey** - *Python Package* - [GitHub](https://github.com/conorfalvey) [LinkedIn](https://linkedin.com/in/conorfalvey)
+* **Conor Falvey** - *Python Module* - [GitHub](https://github.com/conorfalvey) [LinkedIn](https://linkedin.com/in/conorfalvey)
 * **James D. Wilson** - *R package and Paper* - [GitHub](https://github.com/jdwilson4) [LinkedIn](https://www.linkedin.com/in/james-wilson-3012984b/)
 
 ## License - TODO

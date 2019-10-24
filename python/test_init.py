@@ -6,6 +6,10 @@ import math
 import random
 import matplotlib.pyplot as plt
 import itertools as it
+import adjacency_to_edgelist
+import expectation_CM
+import initialization
+import score
 
 #Gen default testing graph
 graph = nx.generators.complete_graph(9)
@@ -22,62 +26,28 @@ adjacency = [[[0, 1, 1, 1, 1, 1, 1, 1, 1],
 print(adjacency)
 
 #Gen edgelist from adjacency matrix
-edgelist = pd.DataFrame({'node1': [0], 'node2': [0], 'layer': [0]})
-m = len(adjacency)
-
-for i in range(0, m):
-    temp_graph = nx.from_numpy_matrix(np.asarray(adjacency[i]), False)
-    edges = nx.convert_matrix.to_pandas_edgelist(temp_graph)
-    edges = edges.drop(['weight'], axis=1)
-    edges = edges.rename(columns={"source": "node1", "target": "node2"})
-    edges['layer'] = i
-    edgelist = edgelist.append(edges)
-
-edgelist = edgelist.reset_index(drop=True)
-edgelist = edgelist.drop(edgelist[edgelist['node1'] == edgelist['node2']].index)
-edgelist = edgelist.reset_index(drop=True)
+edgelist = adjacency_to_edgelist.adjacency_to_edgelist(adjacency)
 
 print(edgelist)
 
 #Gen Expectation.CM from edgelist
-m = max(edgelist['layer'])
-p = list()
-for i in range(0, m + 1):
-    sub = edgelist[edgelist['layer'] == i][['node1', 'node2']]
-    lines = list()
-    for _, row in sub.iterrows():
-        lines.append(" ".join([str(row['node1']), str(row['node2'])]))
-    graph = nx.parse_edgelist(lines)
-    degrees = np.array(list(dict(graph.degree()).values()))
-    degree_total = degrees.sum()
-    expected = np.dot(degrees.reshape(degrees.size, 1), degrees.reshape(1, degrees.size))/degree_total
-    p.append(nx.from_numpy_matrix(np.asarray(expected), False))
+expectation_CM = expectation_CM.expectation_CM(edgelist)
 
-nx.draw(p[0])
+nx.draw(expectation_CM[0])
 #plt.show()
 
 #Gen initialization outputs
-m = 1
-n = 9
-prop_sample = 0.05
-
-layer_set = list()
-for i in range(0, math.ceil(prop_sample * n)):
-    layer_set.append(random.sample(range(0, m), math.ceil(m/2)))
-neighborhoods = list()
-for i in graph.nodes():
-    neighborhoods.append(list([i]) + list(graph.neighbors(i)))
-keep_sample = random.sample(range(1, n), math.ceil(prop_sample * n))
-neighborhoods = [neighborhoods[i] for i in keep_sample]
-initial = pd.DataFrame({'vertex_set': neighborhoods, 'layer_set': layer_set})
+initial = initialization.initialization(graph, 0.05, 1, 9)
 
 print(initial)
 
 #Gen score
+#test_score = score.score(adjacency, initial['vertex_set'], initial['layer_set'], 9)
+
 n = 9
 vertex_set = initial['vertex_set']
 layer_set = initial['layer_set']
-adjacency_score = p
+adjacency_score = expectation_CM
 super_mod = None
 if len(layer_set) < 1 or len(vertex_set) < 1:
     print(0)
