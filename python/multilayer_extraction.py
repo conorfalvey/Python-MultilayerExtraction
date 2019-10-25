@@ -1,74 +1,174 @@
-'''
+import itertools as it
+import math
+import multiprocessing
 import networkx as nx
 import numpy as np
 import pandas as pd
-import multiprocessing as mp
-from expectation_CM import expectation_CM
-from initialization import initialization
+import random
+from . import adjacency_to_edgelist as adj_to_edge
+from . import edgelist_to_degree_sequence as edge_to_deg
+from . import expectation_CM as expCM
+from . import format_edgelist
+from . import initialization as init
+from . import score
+import matplotlib.pyplot as plt
 
 
-def multilayer_extraction(adjacency, seed, min_score, prop_sample, directed):
-    # Adjacency should be an edgelist with three columns (node1, node2, layer)
-    m = max(adjacency[:, 3])
-    n = len(np.unique(np.r_(adjacency[:, 1], adjacency[:, 2])))
-    directed = False
+def multilayer_extraction(edgelist, seed, min_score, prop_sample):
+    m = max(list(edgelist['layer']))
+    n = len(np.unique(edgelist['node1'].append(edgelist['node2'])))
+
+    # Calculate the Modularity Matrix
+    # Use Expectation_CM
     print("Estimation Stage")
+    mod_mat = expCM.expectation_CM(edgelist)
 
-    mod_matrix = expectation_CM(adjacency)
-
+    # Initialize the Communities
     print("Initialization Stage")
-
-    for i in range(1, m):
-        if (i == 1):
-            graph = nx.parse_edgelist(pd.DataFrame(adjacency)[i].values.tolist()[, 1:2])
-            initial_set = initialization(graph, prop_sample, m, n)
+    initial_set = None
+    for i in range(0, m + 1):
+        graph = nx.parse_edgelist(format_edgelist.format_edgelist(edgelist[edgelist['layer'] == i]))
+        if i == 0:
+            initial_set = init.initialization(graph, prop_sample, m, n)
         else:
-            graph = nx.parse_edgelist(pd.DataFrame(adjacency)[i].values.tolist()[, 1:2])
-            initial_set = np.r_(initial_set, initialization(graph, prop_sample, m, n))
+            initial_set.append(init.initialization(graph, prop_sample, m, n))
 
+    # Search Across Initial Sets
     print("Search Stage")
-    print("Searching over ", len(initial_set[1]), " seed sets")
 
+    print("Seaching over", len(initial_set['vertex_set']), "seed sets \n", sep=" ")
     results_temp = list()
-    k = len(initial_set[1])
+    k = len(initial_set['vertex_set'])
+
+    # Detect number of cores present on your machine
+    cores = multiprocessing.cpu_count()
 
 
-    core_count = mp.cpu_count()
-    results_temp = None
+    return "Fuck my life. Holy shit this is one big file. This makes me rethink my entire career."
 
 
-    Results.temp < - foreach(i=1: K, .packages = "MultilayerExtraction") % dopar % {
-        starter < - list()
-    starter$vertex.set < - as.numeric(initial.set$vertex.set[[i]])
-    # if the initial neighborhood is of length 1, add a random vertex
-    if (length(starter$vertex.set) < 2){
-    starter$vertex.set < - c(starter$vertex.set, setdiff(1:n, starter$vertex.set)[1])
+def single_swap(initial_set, mod_mat, m, n):
+    B_new = initial_set['vertex_set']
+    I_new = initial_set['layer_set']
+    score_old = score.score(mod_mat, B_new, I_new, n)
+
+    iterations = 1
+    B_fixed = B_new + 1
+    I_fixed = I_new + 1
+
+
+    while(len([value for value in B_fixed if value in B_new]) < max(len(B_fixed), len(B_new))
+          or len([value for value in I_fixed if value in I_new]) < max(len(I_fixed), len(I_new))):
+        if len(B_new) < 2 or len(I_new) < 1:
+            print('No community found')
+            return None
+
+        B_fixed = B_new
+        I_fixed = I_new
+
+        B = B_new
+        I = I_new + 1
+
+        if m > 1:
+            while len([value for value in I_new if value in I]) < max(len(I_new), len(I)):
+                I = I_new
+                results = swap_layer(mod_mat, I, B, score_old, m, n)
+                I_new = results['layer_set']
+                score_old = results['score_old']
+        if m == 1:
+            I_new = 1
+
+        B = B - 1
+        B_new = B + 1
+
+        while len([value for value in B_new if value in B]) < max(len(B_new), len(B)):
+            B = B_new
+            results = swap_vertex(mod_mat, I_new, B, score_old, m, n)
+
+            B_new = results['B_new']
+            score_old = results['score_old']
+
+    return pd.DataFrame({'B': B_new.sort(), 'I': I_new.sort(), 'Score': score_old})
+
+
+def swap_layer(mod_mat, layer_set, vertex_set, score_old, m, n):
+    if len(layer_set) == 0:
+        print('No Community Found')
+        return None
+
+    changes = layer_change(mod_mat, layer_set, vertex_set, score_old, m, n)
+    changes = [0 for value in changes if math.isnan(value)]
+    changes = [0 for value in changes if value is None]
+
+    outside_candidate = np.where(changes[list(set(range(0, m)).difference(set(layer_set)))])
+    l_add = list(set(range(0, m)) - set(layer_set))[outside_candidate]
+
+    inside_candidate = np.where(changes[layer_set])
+    l_sub = layer_set[inside_candidate]
+
+    results = swap_candidate(mod_mat, layer_set, vertex_set, score_old, m, n)
+    layer_set_new = results['set_new']
+    score_old = results['score_old']
+
+    return pd.DataFrame({'layer_set_new': layer_set_new, 'score_old': score_old})
+'''
+######Choosing which layer to swap one at a time######
+swap.layer = function(adjacency, mod.matrix, layer.set, vertex.set, score.old, m, n){
+
+
+
+  #Make the swap
+  results <- swap.candidate(layer.set, changes, l.add, l.sub, score.old)
+  layer.set.new <- results$set.new
+  score.old <- results$score.old
+
+  return(list(layer.set.new = layer.set.new, score.old = score.old))
+}
+'''
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+'''
+multilayer.extraction = function(adjacency, seed = 123, min.score = 0, prop.sample = 0.05, directed = c(FALSE, TRUE)){
+
+  registerDoParallel(detectCores())
+  Results.temp <- foreach(i=1:K,.packages="MultilayerExtraction") %dopar% {
+    starter <- list()
+    starter$vertex.set <- as.numeric(initial.set$vertex.set[[i]])
+    #if the initial neighborhood is of length 1, add a random vertex
+    if(length(starter$vertex.set) < 2){
+      starter$vertex.set <- c(starter$vertex.set, setdiff(1:n, starter$vertex.set)[1])
     }
-    starter$layer.set < - as.numeric(initial.set$layer.set[[i]])
+    starter$layer.set <- as.numeric(initial.set$layer.set[[i]])
     single.swap(starter, adjacency, mod.matrix, m, n)
+  }
+
+  #Cleanup the results: Keep the unique communities
+  print(paste("Cleaning Stage"))
+
+  if(length(Results.temp) < 1){return("No Community Found")}
+
+  Scores = rep(0, length(Results.temp))
+
+  for(i in 1:length(Results.temp)){
+    if(length(Results.temp[[i]]$B) == 0){Scores[i] = -1000}
+    if(length(Results.temp[[i]]$B) > 0){
+      Scores[i] = Results.temp[[i]]$Score
     }
-
-
-    print("Cleaning Stage")
-    if (len(results_temp) < 1):
-        return("No Community Found")
-
-    scores = np.repeat(0, len(results_temp))
-
-    for i in range(1, len(results_temp)):
-        if (len(results_temp[i][B]) == 0):
-            scores[i] = -1000
-        if (len(results_temp[i][B]) > 0):
-            scores[i] = results_temp[i]
-
-    # Z = pd.DataFrame(Beta=betas, Mean.Score = mean_score, Number_Communities = Number_communities)
-    # Object = list(Community_list = result3, Diagnostics = Z)
-
-    # class(Object) = "MultilayerCommunity"
-    return None
-'''
-
-'''
+  }
+  
     scores = round(scores, 5)
     # keep only unique communities with score greater than threshold
     indx = np.where((not duplicated(scores)) == True)
@@ -87,45 +187,6 @@ def multilayer_extraction(adjacency, seed, min_score, prop_sample, directed):
             results3[[i]] = list(Beta=betas[i], Communities=temp[Communities])
             mean_Score[i] = temp[Mean.Score]
             number_Communities[i] = len(temp[Communities])
-}
-'''
-
-'''
-  #detectCores detects the number of cores available on your instance
-
-  registerDoParallel(detectCores())
-  Results.temp <- foreach(i=1:K,.packages="MultilayerExtraction") %dopar% {
-    starter <- list()
-    starter$vertex.set <- as.numeric(initial.set$vertex.set[[i]])
-    #if the initial neighborhood is of length 1, add a random vertex
-    if(length(starter$vertex.set) < 2){
-      starter$vertex.set <- c(starter$vertex.set, setdiff(1:n, starter$vertex.set)[1])
-    }
-    starter$layer.set <- as.numeric(initial.set$layer.set[[i]])
-    single.swap(starter, adjacency, mod.matrix, m, n)
-  }
-
-  Scores = round(Scores, 5)
-  #keep only unique communities with score greater than threshold
-  indx = which(!duplicated(Scores) == TRUE)
-  indx.2 = which(Scores > min.score)
-  Results2 = Results.temp[intersect(indx, indx.2)]
-  if(length(Results2) == 0){
-    Results = NULL
-    return(Object = NULL)
-  }
-  if(length(Results2) > 0){
-    betas = seq(0.01, 1, by = 0.01)
-    Results3 = list()
-    Number.Communities = rep(0, length(betas))
-    Mean.Score = rep(0, length(betas))
-    for(i in 1:length(betas)){
-      temp = cleanup(Results2, betas[i])
-      Results3[[i]] = list(Beta = betas[i], Communities = temp$Communities)
-      Mean.Score[i] = temp$Mean.Score
-      Number.Communities[i] = length(temp$Communities)
-    }
-  }
 
   Z = data.frame(Beta = betas, Mean.Score = Mean.Score, Number.Communities = Number.Communities)
   Object = list(Community.List = Results3, Diagnostics = Z)
@@ -348,4 +409,75 @@ vertex.change = function(adjacency, mod.matrix, layer.set, vertex.set, score.old
   return(score.changes)
 }
 
+'''
+
+
+'''
+import networkx as nx
+import numpy as np
+import pandas as pd
+import multiprocessing as mp
+from expectation_CM import expectation_CM
+from initialization import initialization
+
+
+def multilayer_extraction(adjacency, seed, min_score, prop_sample, directed):
+    # Adjacency should be an edgelist with three columns (node1, node2, layer)
+    m = max(adjacency[:, 3])
+    n = len(np.unique(np.r_(adjacency[:, 1], adjacency[:, 2])))
+    directed = False
+    print("Estimation Stage")
+
+    mod_matrix = expectation_CM(adjacency)
+
+    print("Initialization Stage")
+
+    for i in range(1, m):
+        if (i == 1):
+            graph = nx.parse_edgelist(pd.DataFrame(adjacency)[i].values.tolist()[, 1:2])
+            initial_set = initialization(graph, prop_sample, m, n)
+        else:
+            graph = nx.parse_edgelist(pd.DataFrame(adjacency)[i].values.tolist()[, 1:2])
+            initial_set = np.r_(initial_set, initialization(graph, prop_sample, m, n))
+
+    print("Search Stage")
+    print("Searching over ", len(initial_set[1]), " seed sets")
+
+    results_temp = list()
+    k = len(initial_set[1])
+
+
+    core_count = mp.cpu_count()
+    results_temp = None
+
+
+    Results.temp < - foreach(i=1: K, .packages = "MultilayerExtraction") % dopar % {
+        starter < - list()
+    starter$vertex.set < - as.numeric(initial.set$vertex.set[[i]])
+    # if the initial neighborhood is of length 1, add a random vertex
+    if (length(starter$vertex.set) < 2){
+    starter$vertex.set < - c(starter$vertex.set, setdiff(1:n, starter$vertex.set)[1])
+    }
+    starter$layer.set < - as.numeric(initial.set$layer.set[[i]])
+    single.swap(starter, adjacency, mod.matrix, m, n)
+    }
+
+
+    print("Cleaning Stage")
+    if (len(results_temp) < 1):
+        return("No Community Found")
+
+    scores = np.repeat(0, len(results_temp))
+
+    for i in range(1, len(results_temp)):
+        if (len(results_temp[i][B]) == 0):
+            scores[i] = -1000
+        if (len(results_temp[i][B]) > 0):
+            scores[i] = results_temp[i]
+
+    # Z = pd.DataFrame(Beta=betas, Mean.Score = mean_score, Number_Communities = Number_communities)
+    # Object = list(Community_list = result3, Diagnostics = Z)
+
+    # class(Object) = "MultilayerCommunity"
+    return None
 '''
