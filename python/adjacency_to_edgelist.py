@@ -22,7 +22,7 @@ def adjacency_to_edgelist(adjacency):
     edgelist = pd.DataFrame({'node1': [0], 'node2': [0], 'layer': [0]})
     m = len(adjacency)
 
-    for i in range(0, m):
+    for i in range(0, m + 1):
         # Convert each matrix to a NetworkX Graph
         temp_graph = nx.from_numpy_matrix(np.asarray(adjacency[i]), False)
 

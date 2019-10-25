@@ -1,4 +1,3 @@
-# ***UNTESTED UNTESTED UNTESTED***
 # score
 #
 # Function that calculates the score of a multilayer vertex - layer community

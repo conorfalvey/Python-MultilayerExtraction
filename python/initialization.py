@@ -22,7 +22,7 @@ import random
 def initialization(graph, prop_sample, m, n):
     # Cannot find analog to R's replicate() function, so a wrapper for random sample appends is used
     layer_set = list()
-    for i in range(0, math.ceil(prop_sample * n)):
+    for i in range(0, math.ceil(prop_sample * n) + 1):
         layer_set.append(random.sample(range(0, m), math.ceil(m/2)))
     # It doesn't appear that NetworkX has an analog for iGraph's neighborhood() function, so we iterate over the nodes
     # and append the neighbors of each node to the node itself to model the output of iGraph's neighborhoods() function
