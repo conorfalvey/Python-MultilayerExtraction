@@ -11,7 +11,7 @@ This takes in a list of matrices:
 
 ![equation](https://latex.codecogs.com/gif.latex?m1%20%3D%20%5Cbegin%7Bbmatrix%7D%200%20%26%201%20%26%201%5C%5C%201%20%26%200%20%26%200%5C%5C%201%20%26%200%20%26%200%20%5Cend%7Bbmatrix%7D) &nbsp;&nbsp;
 ![equation](https://latex.codecogs.com/gif.latex?m2%20%3D%20%5Cbegin%7Bbmatrix%7D%201%20%26%201%20%26%201%5C%5C%201%20%26%200%20%26%201%5C%5C%201%20%26%201%20%26%200%20%5Cend%7Bbmatrix%7D) &nbsp;&nbsp;
-![equation](https://latex.codecogs.com/gif.latex?m2%20%3D%20%5Cbegin%7Bbmatrix%7D%201%20%26%200%20%26%201%5C%5C%200%20%26%200%20%26%201%5C%5C%201%20%26%201%20%26%201%20%5Cend%7Bbmatrix%7D)
+![equation](https://latex.codecogs.com/gif.latex?m3%20%3D%20%5Cbegin%7Bbmatrix%7D%201%20%26%200%20%26%201%5C%5C%200%20%26%200%20%26%201%5C%5C%201%20%26%201%20%26%201%20%5Cend%7Bbmatrix%7D)
 
 ![equation](https://latex.codecogs.com/gif.latex?adjacency%20%3D%20%5Bm1%2C%20m2%2C%20m3%5D)
 
