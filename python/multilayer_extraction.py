@@ -111,147 +111,94 @@ def swap_layer(mod_mat, layer_set, vertex_set, score_old, m, n):
     score_old = results['score_old']
 
     return pd.DataFrame({'layer_set_new': layer_set_new, 'score_old': score_old})
-'''
-######Choosing which layer to swap one at a time######
-swap.layer = function(adjacency, mod.matrix, layer.set, vertex.set, score.old, m, n){
 
 
+def layer_change(mod_mat, layer_set, vertex_set, score_old, m, n):
+    indx = list(set(range(1, m)) - set(layer_set))
+    score_changes = [0] * m
 
-  #Make the swap
-  results <- swap.candidate(layer.set, changes, l.add, l.sub, score.old)
-  layer.set.new <- results$set.new
-  score.old <- results$score.old
+    for i in range(1, m + 1):
+        if i in indx:
+            score_changes[i] = score.score(mod_mat, vertex_set, set(layer_set).union(i), n) - score_old
+        if not i in indx:
+            score_changes[i] = score.score(mod_mat, vertex_set, list(set(layer_set) - set(i)), n) - score_old
 
-  return(list(layer.set.new = layer.set.new, score.old = score.old))
-}
-'''
-
-
-
-
+    return score_changes
 
 
+def swap_candidate(set, changes, add, remove, score_old):
+    if len(remove) == 0 and len(add) > 0:
+        if add is not None:
+            if changes[add] > 0:
+                set_new = set.union(add)
+                score_old = score_old + changes[add]
+            if changes[add] < 0:
+                set_new = set
+                return pd.DataFrame({'set_new': set_new, 'score_old': score_old})
+
+    if len(add) == 0 and len(remove) > 0:
+        if remove is not None:
+            if changes[remove] > 0:
+                set_new = set - remove
+                score_old = score_old + changes[remove]
+                return pd.DataFrame({'set_new': set_new, 'score_old': score_old})
+            if changes[remove] < 0:
+                set_new = set
+                return pd.DataFrame({'set_new': set_new, 'score_old': score_old})
+
+    if len(add) > 0 and len(remove) > 0:
+        if changes[remove] < 0 and changes[add] < 0:
+            set_new = set
+            return pd.DataFrame({'set_new': set_new, 'score_old': score_old})
+        if changes[remove] > changes[add] and changes[remove] > 0:
+            set_new = set - remove
+            score_old = score_old + changes[remove]
+            return pd.DataFrame({'set_new': set_new, 'score_old': score_old})
+        if changes[remove] < changes[add] and changes[add] > 0:
+            set_new = set.union(add)
+            score_old - score_old + changes[add]
+            return pd.DataFrame({'set_new': set_new, 'score_old': score_old})
+
+    if len(add) == 0 and len(remove) == 0:
+        return pd.DataFrame({'set_new': set, 'score_old': score_old})
 
 
-
-
-
-
-
-
-
-'''
-multilayer.extraction = function(adjacency, seed = 123, min.score = 0, prop.sample = 0.05, directed = c(FALSE, TRUE)){
-
-  registerDoParallel(detectCores())
-  Results.temp <- foreach(i=1:K,.packages="MultilayerExtraction") %dopar% {
-    starter <- list()
-    starter$vertex.set <- as.numeric(initial.set$vertex.set[[i]])
-    #if the initial neighborhood is of length 1, add a random vertex
-    if(length(starter$vertex.set) < 2){
-      starter$vertex.set <- c(starter$vertex.set, setdiff(1:n, starter$vertex.set)[1])
-    }
-    starter$layer.set <- as.numeric(initial.set$layer.set[[i]])
-    single.swap(starter, adjacency, mod.matrix, m, n)
-  }
-
-  #Cleanup the results: Keep the unique communities
-  print(paste("Cleaning Stage"))
-
-  if(length(Results.temp) < 1){return("No Community Found")}
-
-  Scores = rep(0, length(Results.temp))
-
-  for(i in 1:length(Results.temp)){
-    if(length(Results.temp[[i]]$B) == 0){Scores[i] = -1000}
-    if(length(Results.temp[[i]]$B) > 0){
-      Scores[i] = Results.temp[[i]]$Score
-    }
-  }
-  
-    scores = round(scores, 5)
-    # keep only unique communities with score greater than threshold
-    indx = np.where((not duplicated(scores)) == True)
-    indx_2 = np.where(scores > min.score)
-    results2 = results_temp[intersect(indx, indx_2)]
-    if (len(results2) == 0):
-        results = None
+def swap_vertex(mod_mat, layer_set, vertex_set, score_old, m, n):
+    if len(layer_set) == 0:
+        print('No Community Found')
         return None
-    if (len(results2) > 0):
-        betas = seq(0.01, 1, by = 0.01)
-        results3 = list()
-        number_Communities = np.repeat(0, len(betas))
-        mean_Score = np.repeat(0, len(betas))
-        for i in range(1, len(betas)):
-            temp = cleanup(results2, betas[i])
-            results3[[i]] = list(Beta=betas[i], Communities=temp[Communities])
-            mean_Score[i] = temp[Mean.Score]
-            number_Communities[i] = len(temp[Communities])
 
-  Z = data.frame(Beta = betas, Mean.Score = Mean.Score, Number.Communities = Number.Communities)
-  Object = list(Community.List = Results3, Diagnostics = Z)
-  class(Object) = "MultilayerCommunity"
-  return(Object)
-}
+    if len(vertex_set) < 5 or len(vertex_set) == n:
+        print('No Community Found')
+        return None
+
+    changes = vertex_change(mod_mat, layer_set, vertex_set, score_old, m, n)
+
+    outside_candidate = np.where(changes[list(set(range(1, m)) - set(vertex_set))])
+    u_add = list(set(range(1, n)) - set(vertex_set))[outside_candidate]
+
+    inside_candidate = np.where(changes[vertex_set])
+    u_sub = vertex_set[inside_candidate]
+
+    results <- swap_candidate(vertex_set, changes, u_add, u_sub, score_old)
+    return pd.DataFrame({'layer_set_new': results['set_new'], 'score_old': results['score_old']})
+
+'''
+
+'''
 
 
-#######################################################################
-##Swapping functions##
-####Function for determining which vertex/layer should be swapped
-swap.candidate = function(set, changes, add, remove, score.old){
-  #If there are only some to be added
-  if(length(remove) == 0 & length(add) > 0){
-    if(is.na(add) == FALSE){
-      if(changes[add] > 0){
-        set.new <- union(set, add)
-        score.old <- score.old + changes[add]
-      }
-      if(changes[add] < 0){
-        set.new <- set
-        return(list(set.new = set.new, score.old = score.old))
-      }
-    }
-  }
 
-  #If there are only some to removed
-  if(length(add) == 0 & length(remove) > 0){
-    if(is.na(remove) == FALSE){
-      if(changes[remove] > 0){
-        set.new <- setdiff(set,remove)
-        score.old <- score.old + changes[remove]
-        return(list(set.new = set.new, score.old = score.old))
-      }
-      if(changes[remove] < 0){
-        set.new <- set
-        return(list(set.new = set.new, score.old = score.old))
-      }
-    }
-  }
 
-  #If there are some to removed and some to be added
-  if(length(add) > 0 & length(remove) > 0){
-    if(changes[remove] < 0 & changes[add] < 0){
-      set.new <- set
-      return(list(set.new = set.new, score.old = score.old))
-    }
-    if(changes[remove] > changes[add] & changes[remove] > 0){
-      set.new <- setdiff(set, remove)
-      score.old <- score.old + changes[remove]
-      return(list(set.new = set.new, score.old = score.old))
-    }
-    if(changes[remove] < changes[add] & changes[add] > 0){
-      set.new <- union(set, add)
-      score.old <- score.old + changes[add]
-      return(list(set.new = set.new, score.old = score.old))
-    }
-  }
 
-  #if there are none to be added nor removed
-  if(length(add) == 0 & length(remove) == 0){
-    return(list(set.new = set, score.old = score.old))
-  }
-}
 
+
+
+
+
+
+
+'''
 ######Choosing which layer to swap one at a time######
 swap.layer = function(adjacency, mod.matrix, layer.set, vertex.set, score.old, m, n){
 
