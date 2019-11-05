@@ -11,7 +11,6 @@ from . import expectation_CM as expCM
 from . import format_edgelist
 from . import initialization as init
 from . import score
-import matplotlib.pyplot as plt
 
 
 def multilayer_extraction(edgelist, seed, min_score, prop_sample):
@@ -43,9 +42,49 @@ def multilayer_extraction(edgelist, seed, min_score, prop_sample):
     # Detect number of cores present on your machine
     cores = multiprocessing.cpu_count()
 
+    # Skipping parallelization for now
 
-    return "Fuck my life. Holy shit this is one big file. This makes me rethink my entire career."
 
+    print("Cleaning Stage")
+
+    return None
+
+
+'''
+    core_count = mp.cpu_count()
+    results_temp = None
+
+
+    Results.temp < - foreach(i=1: K, .packages = "MultilayerExtraction") % dopar % {
+        starter < - list()
+    starter$vertex.set < - as.numeric(initial.set$vertex.set[[i]])
+    # if the initial neighborhood is of length 1, add a random vertex
+    if (length(starter$vertex.set) < 2){
+    starter$vertex.set < - c(starter$vertex.set, setdiff(1:n, starter$vertex.set)[1])
+    }
+    starter$layer.set < - as.numeric(initial.set$layer.set[[i]])
+    single.swap(starter, adjacency, mod.matrix, m, n)
+    }
+
+
+    print("Cleaning Stage")
+    if (len(results_temp) < 1):
+        return("No Community Found")
+
+    scores = np.repeat(0, len(results_temp))
+
+    for i in range(1, len(results_temp)):
+        if (len(results_temp[i][B]) == 0):
+            scores[i] = -1000
+        if (len(results_temp[i][B]) > 0):
+            scores[i] = results_temp[i]
+
+    # Z = pd.DataFrame(Beta=betas, Mean.Score = mean_score, Number_Communities = Number_communities)
+    # Object = list(Community_list = result3, Diagnostics = Z)
+
+    # class(Object) = "MultilayerCommunity"
+    return None
+'''
 
 def single_swap(initial_set, mod_mat, m, n):
     B_new = initial_set['vertex_set']
@@ -100,13 +139,13 @@ def swap_layer(mod_mat, layer_set, vertex_set, score_old, m, n):
     changes = [0 for value in changes if math.isnan(value)]
     changes = [0 for value in changes if value is None]
 
-    outside_candidate = np.where(changes[list(set(range(0, m)).difference(set(layer_set)))])
-    l_add = list(set(range(0, m)) - set(layer_set))[outside_candidate]
+    outside_candidate = np.where(changes[changes in list(set(range(0, m)).difference(set(layer_set)))])
+    l_add = list(set(range(0, m)) - set(layer_set))[list in outside_candidate]
 
     inside_candidate = np.where(changes[layer_set])
     l_sub = layer_set[inside_candidate]
 
-    results = swap_candidate(mod_mat, layer_set, vertex_set, score_old, m, n)
+    results = swap_candidate(layer_set, changes, l_add, l_sub, score_old)
     layer_set_new = results['set_new']
     score_old = results['score_old']
 
@@ -156,7 +195,7 @@ def swap_candidate(set, changes, add, remove, score_old):
             return pd.DataFrame({'set_new': set_new, 'score_old': score_old})
         if changes[remove] < changes[add] and changes[add] > 0:
             set_new = set.union(add)
-            score_old - score_old + changes[add]
+            score_old = score_old + changes[add]
             return pd.DataFrame({'set_new': set_new, 'score_old': score_old})
 
     if len(add) == 0 and len(remove) == 0:
@@ -174,257 +213,24 @@ def swap_vertex(mod_mat, layer_set, vertex_set, score_old, m, n):
 
     changes = vertex_change(mod_mat, layer_set, vertex_set, score_old, m, n)
 
-    outside_candidate = np.where(changes[list(set(range(1, m)) - set(vertex_set))])
-    u_add = list(set(range(1, n)) - set(vertex_set))[outside_candidate]
+    outside_candidate = np.where(changes[changes in list(set(range(1, m)) - set(vertex_set))])
+    u_add = list(set(range(1, n)) - set(vertex_set))[list in outside_candidate]
 
     inside_candidate = np.where(changes[vertex_set])
     u_sub = vertex_set[inside_candidate]
 
-    results <- swap_candidate(vertex_set, changes, u_add, u_sub, score_old)
+    results = swap_candidate(vertex_set, changes, u_add, u_sub, score_old)
     return pd.DataFrame({'layer_set_new': results['set_new'], 'score_old': results['score_old']})
 
-'''
 
-'''
+def vertex_change(mod_mat, layer_set, vertex_set, score_old, m, n):
+    indx = list(set(range(1, n)) - set(vertex_set))
+    score_changes = [0] * (n + 1)
 
-
-
-
-
-
-
-
-
-
-
-
-'''
-######Choosing which layer to swap one at a time######
-swap.layer = function(adjacency, mod.matrix, layer.set, vertex.set, score.old, m, n){
-
-  if(length(layer.set) == 0){
-    print('No Community Found')
-    return(NULL)
-  }
-
-  changes <- layer.change(adjacency, mod.matrix, layer.set, vertex.set, score.old, m, n)
-  changes[which(is.null(changes) == TRUE)] <- 0
-  changes[which(is.na(changes) == TRUE)] <- 0
-
-  outside.candidate <- which.max(changes[setdiff(1:m, layer.set)]) #which layer should we add?
-  l.add <- setdiff(1:m, layer.set)[outside.candidate]
-
-  inside.candidate <- which.max(changes[layer.set]) #which layer should we remove?
-  l.sub <- layer.set[inside.candidate]
-
-  #Make the swap
-  results <- swap.candidate(layer.set, changes, l.add, l.sub, score.old)
-  layer.set.new <- results$set.new
-  score.old <- results$score.old
-
-  return(list(layer.set.new = layer.set.new, score.old = score.old))
-}
-
-#######################################################################
-######Choosing which vertex to swap one at a time######
-swap.vertex = function(adjacency, mod.matrix, layer.set, vertex.set, score.old, m, n){
-
-  if(length(layer.set) == 0){
-    print('No Community Found')
-    return(NULL)
-  }
-
-  #swap decision
-  if(length(vertex.set) < 5){
-    print('No Community Found')
-    return(NULL)
-  }
-
-  if(length(vertex.set) == n){
-    print('No Community Found')
-    return(NULL)
-  }
-  changes = vertex.change(adjacency, mod.matrix, layer.set, vertex.set, score.old, m, n)
-
-  #Get candidates
-  outside.candidate <- which.max(changes[setdiff(1:n, vertex.set)])[1]
-  u.add <- setdiff(1:n, vertex.set)[outside.candidate]
-
-  inside.candidate <- which.max(changes[vertex.set])
-  u.sub <- vertex.set[inside.candidate]
-
-  #Make the swap
-  results <- swap.candidate(vertex.set, changes, u.add, u.sub, score.old)
-  return(list(B.new = results$set.new, score.old = results$score.old))
-}
-#######################################################################
-#Inner function for a single swap inside the function for Multilayer.Extraction
-#Note: check the names of initial set
-single.swap = function(initial.set, adjacency, mod.matrix, m, n){
-
-  #initialize vertex.set and layer.set
-  B.new <- initial.set$vertex.set
-  I.new <- initial.set$layer.set
-  score.old <- score(mod.matrix, vertex.set = B.new, layer.set = I.new, n)
-
-  iterations <- 1
-  B.fixed <- B.new + 1
-  I.fixed <- I.new + 1
-
-  #main loop
-  while(length(intersect(B.fixed, B.new)) < max(length(B.fixed), length(B.new)) |
-        length(intersect(I.fixed, I.new)) < max(length(I.fixed), length(I.new))){
-
-    if(length(B.new) < 2 | length(I.new) < 1){
-      print('No community found')
-      return(NULL)
-    }
-
-    #seems redundant, check...
-    B.fixed <- B.new
-    I.fixed <- I.new
-
-    B <- B.new
-    I <- I.new + 1
-
-    #update layer set
-    if(m > 1){
-      while(length(intersect(I.new, I)) < max(length(I.new), length(I))){
-
-        I <- I.new
-        results <- swap.layer(adjacency, mod.matrix, I, B, score.old, m, n)
-        I.new <- results$layer.set.new
-        score.old <- results$score.old
-      }
-    }
-    if(m == 1){
-      I.new <- 1
-    }
-
-    #update vertex set
-    B <- B - 1
-    B.new <- B + 1
-
-    while(length(intersect(B.new, B)) < max(length(B.new), length(B))){
-      B <- B.new
-      results <- swap.vertex(adjacency, mod.matrix, I.new, B, score.old, m, n)
-
-      B.new <- results$B.new
-      score.old <- results$score.old
-    }
-  }
-  return(list(B = sort(B.new), I = sort(I.new), Score = score.old))
-}
-
-######Effect on score when adding or subtracting a layer#######
-layer.change = function(adjacency, mod.matrix, layer.set, vertex.set, score.old, m, n){
-
-  indx <- setdiff(1:m, layer.set) #which layers are not in the current set
-  score.changes <- rep(0, m)
-
-  for(i in 1:m){
-    if(i %in% indx){
-      score.changes[i] <- score(mod.matrix, vertex.set =
-                                  vertex.set, layer.set = union(layer.set, i), n) - score.old
-    }
-    if(i %in% indx == FALSE){
-      score.changes[i] <- score(mod.matrix, vertex.set =
-                                  vertex.set, layer.set = setdiff(layer.set, i), n) - score.old
-    }
-  }
-  return(score.changes)
-}
-
-######Effect on score when adding or subtracting a vertex#######
-vertex.change = function(adjacency, mod.matrix, layer.set, vertex.set, score.old, m, n){
-
-  indx <- setdiff(1:n, vertex.set)
-  score.changes <- rep(0, n)
-
-  #the following can also be parallelized!
-  for(i in 1:n){
-    if(i %in% indx){
-      score.changes[i] <- score(mod.matrix, vertex.set =
-                                  union(vertex.set, i), layer.set = layer.set, n) - score.old
-    }
-    if(i %in% indx == FALSE){
-      score.changes[i] <- score(mod.matrix, vertex.set =
-                                  setdiff(vertex.set, i), layer.set = layer.set, n) - score.old
-    }
-  }
-
-  return(score.changes)
-}
-
-'''
-
-
-'''
-import networkx as nx
-import numpy as np
-import pandas as pd
-import multiprocessing as mp
-from expectation_CM import expectation_CM
-from initialization import initialization
-
-
-def multilayer_extraction(adjacency, seed, min_score, prop_sample, directed):
-    # Adjacency should be an edgelist with three columns (node1, node2, layer)
-    m = max(adjacency[:, 3])
-    n = len(np.unique(np.r_(adjacency[:, 1], adjacency[:, 2])))
-    directed = False
-    print("Estimation Stage")
-
-    mod_matrix = expectation_CM(adjacency)
-
-    print("Initialization Stage")
-
-    for i in range(1, m):
-        if (i == 1):
-            graph = nx.parse_edgelist(pd.DataFrame(adjacency)[i].values.tolist()[, 1:2])
-            initial_set = initialization(graph, prop_sample, m, n)
+    for i in range(1, n + 1):
+        if i in indx:
+            score_changes[i] = score.score(mod_mat, set(vertex_set).union(i), layer_set, n) - score_old
         else:
-            graph = nx.parse_edgelist(pd.DataFrame(adjacency)[i].values.tolist()[, 1:2])
-            initial_set = np.r_(initial_set, initialization(graph, prop_sample, m, n))
+            score_changes[i] = score.score(mod_mat, list(set(vertex_set) - set(1)), layer_set, n) - score_old
 
-    print("Search Stage")
-    print("Searching over ", len(initial_set[1]), " seed sets")
-
-    results_temp = list()
-    k = len(initial_set[1])
-
-
-    core_count = mp.cpu_count()
-    results_temp = None
-
-
-    Results.temp < - foreach(i=1: K, .packages = "MultilayerExtraction") % dopar % {
-        starter < - list()
-    starter$vertex.set < - as.numeric(initial.set$vertex.set[[i]])
-    # if the initial neighborhood is of length 1, add a random vertex
-    if (length(starter$vertex.set) < 2){
-    starter$vertex.set < - c(starter$vertex.set, setdiff(1:n, starter$vertex.set)[1])
-    }
-    starter$layer.set < - as.numeric(initial.set$layer.set[[i]])
-    single.swap(starter, adjacency, mod.matrix, m, n)
-    }
-
-
-    print("Cleaning Stage")
-    if (len(results_temp) < 1):
-        return("No Community Found")
-
-    scores = np.repeat(0, len(results_temp))
-
-    for i in range(1, len(results_temp)):
-        if (len(results_temp[i][B]) == 0):
-            scores[i] = -1000
-        if (len(results_temp[i][B]) > 0):
-            scores[i] = results_temp[i]
-
-    # Z = pd.DataFrame(Beta=betas, Mean.Score = mean_score, Number_Communities = Number_communities)
-    # Object = list(Community_list = result3, Diagnostics = Z)
-
-    # class(Object) = "MultilayerCommunity"
-    return None
-'''
+    return score_changes
