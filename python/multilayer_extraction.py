@@ -1,6 +1,6 @@
 import itertools as it
 import math
-import multiprocessing
+import multiprocessing as mp
 import networkx as nx
 import numpy as np
 import pandas as pd
@@ -40,50 +40,63 @@ def multilayer_extraction(edgelist, seed, min_score, prop_sample):
     k = len(initial_set['vertex_set'])
 
     # Detect number of cores present on your machine
-    cores = multiprocessing.cpu_count()
-
-    # Skipping parallelization for now
+    cores = mp.cpu_count()
+    for i in range(0, k):
+        starter = pd.DataFrame()
+        starter['vertex_set'] = initial_set["vertex_set"][i]
+        if len(starter["vertex_set"] < 2):
+            starter["vertex_set"] = np.r_(starter["vertex_set"], list(set(range(1, n)) - set(starter["vertex_set"]))[i])
+        starter["layer_set"] = initial_set["layer_set"][i]
+        temp = single_swap(starter, mod_mat, m, n)
+        results_temp.extend(temp)
 
 
     print("Cleaning Stage")
+    if len(results_temp) < 1:
+        return "No Community Found"
+
+    scores = np.repeat(0, len(results_temp))
+
+    for i in range(1, len(results_temp)):
+        if (len(results_temp["layer_set"][i]) == 0):
+            scores[i] = -1000
+        if (len(results_temp["layer_set"][i]) > 0):
+            scores[i] = results_temp[i]
+
+    scores = round(scores[5])
+    indx = np.where()
 
     return None
 
 
 '''
-    core_count = mp.cpu_count()
-    results_temp = None
 
-
-    Results.temp < - foreach(i=1: K, .packages = "MultilayerExtraction") % dopar % {
-        starter < - list()
-    starter$vertex.set < - as.numeric(initial.set$vertex.set[[i]])
-    # if the initial neighborhood is of length 1, add a random vertex
-    if (length(starter$vertex.set) < 2){
-    starter$vertex.set < - c(starter$vertex.set, setdiff(1:n, starter$vertex.set)[1])
+  Scores = round(Scores, 5)
+  #keep only unique communities with score greater than threshold
+  indx = which(!duplicated(Scores) == TRUE)
+  indx.2 = which(Scores > min.score)
+  Results2 = Results.temp[intersect(indx, indx.2)]
+  if(length(Results2) == 0){
+    Results = NULL
+    return(Object = NULL)
+  }
+  if(length(Results2) > 0){
+    betas = seq(0.01, 1, by = 0.01)
+    Results3 = list()
+    Number.Communities = rep(0, length(betas))
+    Mean.Score = rep(0, length(betas))
+    for(i in 1:length(betas)){
+      temp = cleanup(Results2, betas[i])
+      Results3[[i]] = list(Beta = betas[i], Communities = temp$Communities)
+      Mean.Score[i] = temp$Mean.Score
+      Number.Communities[i] = length(temp$Communities)
     }
-    starter$layer.set < - as.numeric(initial.set$layer.set[[i]])
-    single.swap(starter, adjacency, mod.matrix, m, n)
-    }
-
-
-    print("Cleaning Stage")
-    if (len(results_temp) < 1):
-        return("No Community Found")
-
-    scores = np.repeat(0, len(results_temp))
-
-    for i in range(1, len(results_temp)):
-        if (len(results_temp[i][B]) == 0):
-            scores[i] = -1000
-        if (len(results_temp[i][B]) > 0):
-            scores[i] = results_temp[i]
-
-    # Z = pd.DataFrame(Beta=betas, Mean.Score = mean_score, Number_Communities = Number_communities)
-    # Object = list(Community_list = result3, Diagnostics = Z)
-
-    # class(Object) = "MultilayerCommunity"
-    return None
+  }
+  
+  Z = data.frame(Beta = betas, Mean.Score = Mean.Score, Number.Communities = Number.Communities)
+  Object = list(Community.List = Results3, Diagnostics = Z)
+  class(Object) = "MultilayerCommunity"
+  return(Object)
 '''
 
 def single_swap(initial_set, mod_mat, m, n):
