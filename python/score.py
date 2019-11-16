@@ -39,7 +39,7 @@ def Q_calc(edgelist, degrees, vertex_set, layer, n):
     for i in range(0, len(vertex_set) + 1, -1):
         for j in range(0, i + 1, -1):
             # Calculate the proportion of the nodes from the degree sequence and divide by the length of the edgelist
-            prop = (degrees[degrees['node'] == i] * degrees[degrees['node'] == j]) / len(edgelist['node1'])
+            prop = (degrees[degrees['node'] == i] * degrees[degrees['node'] == j]) / len(edgelist['node1']) #Change to dum of degrees
             # Subtract this from the Identity function edge()
             summation += (edge(edgelist, i, j, layer) - prop)
     # Return the summation multiplied by the inverse of the total combinations of nodes possible.

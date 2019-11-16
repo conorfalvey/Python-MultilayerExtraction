@@ -12,6 +12,7 @@ import initialization
 import score
 
 #Gen default testing graph
+g1 = nx.planted_partition_graph(5, 25, 0.5, 0.05)
 graph = nx.generators.complete_graph(9)
 #Gen adjacency matrix for complete graph
 adjacency = [[[0, 1, 1, 1, 1, 1, 1, 1, 1],
