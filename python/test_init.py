@@ -3,18 +3,17 @@ import networkx as nx
 import pandas as pd
 import numpy as np
 import math
-import random
-import matplotlib.pyplot as plt
 import itertools as it
-import adjacency_to_edgelist
-import expectation_CM
-import initialization
-import score
+from . import adjacency_to_edgelist
+from . import expectation_CM
+from . import initialization
+from . import score
+import matplotlib.pyplot as plt
 
-#Gen default testing graph
+# Gen default testing graph
 g1 = nx.planted_partition_graph(5, 25, 0.5, 0.05)
 graph = nx.generators.complete_graph(9)
-#Gen adjacency matrix for complete graph
+# Gen adjacency matrix for complete graph
 adjacency = [[[0, 1, 1, 1, 1, 1, 1, 1, 1],
              [1, 0, 1, 1, 1, 1, 1, 1, 1],
              [1, 1, 0, 1, 1, 1, 1, 1, 1],
@@ -26,24 +25,24 @@ adjacency = [[[0, 1, 1, 1, 1, 1, 1, 1, 1],
              [1, 1, 1, 1, 1, 1, 1, 1, 0]]]
 print(adjacency)
 
-#Gen edgelist from adjacency matrix
+# Gen edgelist from adjacency matrix
 edgelist = adjacency_to_edgelist.adjacency_to_edgelist(adjacency)
 
 print(edgelist)
 
-#Gen Expectation.CM from edgelist
+# Gen Expectation.CM from edgelist
 expectation_CM = expectation_CM.expectation_CM(edgelist)
 
 nx.draw(expectation_CM[0])
-#plt.show()
+plt.show()
 
-#Gen initialization outputs
+# Gen initialization outputs
 initial = initialization.initialization(graph, 0.05, 1, 9)
 
 print(initial)
 
-#Gen score
-#test_score = score.score(adjacency, initial['vertex_set'], initial['layer_set'], 9)
+# Gen score
+# test_score = score.score(adjacency, initial['vertex_set'], initial['layer_set'], 9)
 
 n = 9
 vertex_set = initial['vertex_set']
@@ -75,3 +74,4 @@ obs_score = (tot_mod ** 2) / ((n ** 2 * it.combinations(range(0, len(vertex_set)
 
 print(obs_score)
 
+print(score.score(edgelist, vertex_set, layer_set, n))
